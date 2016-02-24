@@ -1,0 +1,13 @@
+module <%= class_name %>
+    class API < Grape::API
+    mount <%=api_namespace%>
+    # add_swagger_documentation api_version: 'api/<%=version%>'
+    # add_swagger_documentation mount_path: '/swagger', base_path: 'http://localhost:3000/api', api_version: '<%=version%>'
+    # add_swagger_documentation mount_path: '/api-docs', base_path: 'http://localhost:3000/api', api_version: '<%=version%>'
+    add_swagger_documentation mount_path: '/api-docs', base_path: '/api', api_version: '<%=version%>', format: :json
+    add_swagger_documentation hide_documentation_path: true,
+                              hide_format: true,
+                              include_base_url: true,
+                              models: <%=entities_namespace%>.constants.map { |c| "<%=entities_namespace%>::#{c.to_s}".constantize }
+    end
+end

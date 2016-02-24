@@ -1,0 +1,18 @@
+module <%=assistants_namespace%>::SharedParams
+  extend Grape::API::Helpers
+
+  params :pagination do
+    optional :page, type: Integer, default: 1, desc: 'Page number'
+    optional :per_page, type: Integer, default: 20, desc: 'Per page'
+  end
+
+  params :sort do
+    optional :sort_field, type: String, desc: 'Sort by field'
+    optional :sort_order, type: String, values: ['asc', 'desc'], desc: 'Sort order'
+  end
+
+  params :fields do
+    optional :fields, default: nil, desc: 'List of fields to be selected'
+  end
+end
+

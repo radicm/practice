@@ -1,0 +1,56 @@
+class <%=api_namespace%> < Grape::API
+  #prefix 'atenti-dss'
+  version '<%=version%>', using: :path, vendor: '<%=class_name%>'
+  #version '<%=version%>', using: :path, vendor: '<%=class_name%>', format: :json
+  format :json
+  #formatter :json, Grape::Formatter::Rabl
+
+  before do
+    header['Access-Control-Allow-Origin'] = '*'
+    header['Access-Control-Request-Method'] = '*'
+    authenticate! unless skip_filter?(:authenticate)
+  end
+
+  rescue_from :all do |e|
+    Rack::Response.new([ { 'error' => e.message + '|' + e.class.to_s }.to_json ], 500, { 'Content-type' => 'application/json' }).finish
+  end
+
+  #rescue_from :all do |error|
+  #  if error.class.name.end_with?('AuthenticationError')
+  #    headers =  {
+  #        'Content-type' => 'application/json',
+  #        'WWW-Authenticate' => 'Basic realm="mixscan"'
+  #    }
+  #    json = { message: 'Unauthorized' }.to_json
+  #    code = 401
+  #  else
+  #    logger.error "API << #{env['REQUEST_METHOD']} #{env['PATH_INFO']} -- #{error.class.name} -- #{error.message}"
+  #    logger.info "API << Last error's backtrace:\n#{error.backtrace.join("\n")}"
+  #    ENV['DEBUG'] && puts("API << #{env['REQUEST_METHOD']} #{env['PATH_INFO']} -- #{error.class.name} -- #{error.message} -- #{error.backtrace}")
+  #
+  #    json = { error: error.class.name.split('::').last, message: "#{error.message}#{Padrino.env.eql?(:test) ? error.backtrace : ''}"}.to_json
+  #    code = error.class.name.to_s.match(/[Vv]alidation/) ? 400 : 500
+  #
+  #    headers =
+  #        {
+  #            'Content-Type' => 'application/json',
+  #            'Access-Control-Allow-Origin' => '*',
+  #            'Access-Control-Request-Method' => '*'
+  #        }
+  #  end
+  #  rack_response(json, code, headers)
+  #end
+
+  # desc 'For testing API connection'
+  # get :hello do
+  #   { message: 'Hello, sailor!' }
+  # end
+
+  helpers <%=assistants_namespace%>::Authenticate
+
+  # mount Users
+  # mount Clients
+  # mount AccountManagers
+
+
+end

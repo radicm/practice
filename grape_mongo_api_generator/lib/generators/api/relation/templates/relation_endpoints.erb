@@ -1,0 +1,204 @@
+class <%=api_namespace%>::<%=api_class_name%> < Grape::API
+  helpers <%=api_namespace%>::Assistants::SharedParams
+  helpers <%=api_namespace%>::Assistants::SerializationAssistant
+
+  helpers do
+    def <%=file_name%>_params
+      parameters = ActionController::Parameters.new(params)
+      parameters.permit(<%=permit_params%>)
+    end
+  end
+
+  # NOTE: get skip_filter: :authenticate do # skip auth
+  # NOTE: oauth scopes scopes: :public or [:public, :write]
+
+  resource :<%=model.pluralize.downcase%> do
+    route_param :<%=model%>_id do
+      resource :<%=file_name.pluralize%> do
+<% if make_action?('index') %>
+        desc 'Fetch <%=human_name%> collection' do
+          detail '<%=human_name%>'
+          params  <%=app_api_name.camelize%>::API::V1::Entities::SharedParams.documentation
+          success <%=entity_collection_name%>
+          failure [
+                      [400, 'Bad Request'],
+                      [401, 'Unauthorized']
+                  ]
+          named 'Get<%=class_name%>Collection'
+          headers [
+                      XAuthToken: {
+                          description: 'Validates your identity',
+                          required: true
+                      },
+                      XOptionalHeader: {
+                          description: 'Not really needed',
+                          required: false
+                      }
+                  ]
+        end
+        get scopes: :public do
+          authorize!(<%=class_name%>, :index?)
+          present list(apply_policy_filter(<%=model.camelize%>.fetch(params[:id]).<%=file_name.pluralize%>)), with: <%=entity_collection_name%>
+        end
+<%end%><% if make_action?('new') %>
+        desc 'Return an empty object for creating <%=human_name%>' do
+          detail '<%=human_name%>'
+          failure [
+                      [400, 'Bad Request'],
+                      [401, 'Unauthorized']
+                  ]
+          named 'Get<%=class_name%>New'
+          headers [
+                      XAuthToken: {
+                          description: 'Validates your identity',
+                          required: true
+                      },
+                      XOptionalHeader: {
+                          description: 'Not really needed',
+                          required: false
+                      }
+                  ]
+        end
+        get '/new', scopes: :public do
+          item = <%=class_name%>.new
+          authorize!(item, :new?)
+          present item, with: <%=entity_name%>::Response
+        end
+<%end%><% if make_action?('create') %>
+        desc 'Create <%=human_name%>' do
+          detail '<%=human_name%>'
+          params  <%=entity_name%>::Request.documentation
+          success <%=entity_name%>::Response
+          failure [
+                      [400, 'Bad Request'],
+                      [401, 'Unauthorized']
+                  ]
+          named 'Post<%=class_name%>'
+          headers [
+                      XAuthToken: {
+                          description: 'Validates your identity',
+                          required: true
+                      },
+                      XOptionalHeader: {
+                          description: 'Not really needed',
+                          required: false
+                      }
+                  ]
+        end
+        post scopes: :public do
+          item = <%=class_name%>.new(<%=file_name%>_params)<%children_objects.each do |x|%>
+          <%=x%><%end%>
+          authorize!(<%=class_name%>, :create?)
+          item.save!
+          present item, with: <%=entity_name%>::Response, type: :full
+        end
+<%end%><% if make_action?('show') %>
+        route_param :<%=file_name%>_id do
+          desc 'Fetch <%=human_name%> by id' do
+            detail '<%=human_name%>'
+            success <%=entity_name%>::Response
+            failure [
+                        [400, 'Bad Request'],
+                        [401, 'Unauthorized']
+                    ]
+            named 'Get<%=class_name%>ById'
+            headers [
+                        XAuthToken: {
+                            description: 'Validates your identity',
+                            required: true
+                        },
+                        XOptionalHeader: {
+                            description: 'Not really needed',
+                            required: false
+                        }
+                    ]
+          end
+          get scopes: :public do
+            item = <%=model%>.fetch(params[:id]).<%=file_name.pluralize%>.fetch(params[:<%=file_name%>_id])
+            authorize!(item, :show?)
+            present item, with: <%=entity_name%>::Response, type: :full
+          end
+<%end%><% if make_action?('edit') %>
+          desc 'Return an object for editing <%=human_name%>' do
+            detail '<%=human_name%>'
+            failure [
+                        [401, 'Unauthorized'],
+                        [404, 'Not Found']
+                    ]
+            named 'Put<%=class_name%>'
+            headers [
+                        XAuthToken: {
+                            description: 'Validates your identity',
+                            required: true
+                        },
+                        XOptionalHeader: {
+                            description: 'Not really needed',
+                            required: false
+                        }
+                    ]
+          end
+          get '/edit', scopes: :public do
+            item = <%=model%>.fetch(params[:<%=file_name%>_id])
+            authorize!(item, :edit?)
+            item.update_attributes(<%=file_name%>_params)
+            present item, with: <%=entity_name%>::Response
+          end
+<%end%><% if make_action?('update') %>
+          desc 'Update <%=human_name%> by id' do
+            detail '<%=human_name%>'
+            params <%=entity_name%>::Request.documentation
+            success <%=entity_name%>::Response
+            failure [
+                        [401, 'Unauthorized'],
+                        [404, 'Not Found']
+                    ]
+            named 'Put<%=class_name%>'
+            headers [
+                        XAuthToken: {
+                            description: 'Validates your identity',
+                            required: true
+                        },
+                        XOptionalHeader: {
+                            description: 'Not really needed',
+                            required: false
+                        }
+                    ]
+          end
+          put scopes: :public do
+            item = <%=class_name%>.fetch(params[:<%=file_name%>_id])
+            authorize!(item, :update?)
+            item.update_attributes(model_params)<%children_objects.each do |x|%>
+            <%=x%><%end%>
+            item.save!
+            present item, with: <%=entity_name%>::Response, type: :full
+          end
+<%end%><% if make_action?('destroy') %>
+          desc 'Delete <%=human_name%> by id' do
+            detail '<%=human_name%>'
+            failure [
+                        [401, 'Unauthorized'],
+                        [404, 'Not Found']
+                    ]
+            named 'Delete<%=class_name%>'
+            headers [
+                        XAuthToken: {
+                            description: 'Validates your identity',
+                            required: true
+                        },
+                        XOptionalHeader: {
+                            description: 'Not really needed',
+                            required: false
+                        }
+                    ]
+          end
+          delete scopes: :public do
+            item = <%=class_name%>.fetch(params[:<%=file_name%>_id])
+            authorize!(item, :destroy?)
+            item.destroy
+          end
+<%end%>
+        end
+      end
+    end
+  end
+end

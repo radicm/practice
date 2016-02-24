@@ -1,0 +1,45 @@
+module <%=entity_name%>
+
+  class Request < Grape::Entity
+
+    def self.entity_name
+      '<%=class_name%>'
+    end
+
+<% request_params.each do |param| %>
+    expose :<%=param.name%>, documentation: { type: <%=param.type%>, desc: '<%=param.name.humanize%> id'<%= ', required: true' if field_required?(param.name)%><%=", regexp: #{field_regex(param.name).inspect}" if field_regex(param.name)%><%=", regexp:#{length_field_regex(param.name)}" unless length_field_regex(param.name).nil?%><%= ", value: #{param.default_value}" unless  param.default_value.nil? || param.default_value.class == Proc || param.default_value == ''%> }<% end %>
+<% valid_request_relations(false, 1, :has_one, :belongs_to).each do |val| %>
+    expose :<%=val.singular_key%>, documentation: { type: String, desc: '<%=val.human_name%> id'<%= ', required: true' if field_required?(val.singular_key)%> }<% end %>
+<% valid_request_relations(true, 1, :has_one, :belongs_to).each do |val| %>
+    expose :<%=val.singular_key%>, documentation: { type: String, desc: '<%=val.human_name%> id'<%= ', required: true' if field_required?(val.singular_key)%> }<% end %>
+<% valid_request_relations(false, 2, :has_and_belongs_to_many).each do |val| %>
+    expose :<%=val.plural_key%>, documentation: { type: Array, desc: '<%=val.human_name%> ids'<%= ', required: true' if field_required?(val.plural_key)%> }<% end %>
+  end
+
+  class Response < Grape::Entity
+
+    def self.entity_name
+      '<%=class_name%>'
+    end
+
+    expose :_id, documentation: { type: String, desc: 'Id' }, as: :id do |status, _options| status._id.to_s end
+
+<% params.each do |param| %>
+    expose :<%=param.name%>, documentation: { type: <%=param.type%>, desc: '<%=param.name.humanize%>' }, safe: true<% end %>
+<% valid_response_relations(false, 1, :belongs_to, :has_many).each do |val| %>
+    expose :<%=val.singular_key%>, documentation: { type: String, desc: '<%=val.human_name%> id' }, safe: true do |status, _options| status.<%=val.singular_key%>.to_s end<% end %>
+<% valid_response_relations(false, 2, :has_and_belongs_to_many).each do |val| %>
+    expose :<%=val.plural_key%>, documentation: { type: String, desc: '<%=val.human_name%> ids' }, safe: true do |status, _options| status.<%=val.plural_key%>.map(&:to_s) end<% end %>
+<% valid_response_relations(true, 0, :belongs_to, :has_one, :has_many).each do |val| %>
+    expose :<%=val.name%>, documentation: { desc: '<%=val.class_name%>' }, safe: true do |object, _options| "<%=entities_namespace%>::#{object.<%=val.name%>.class}::Response".constantize.represent(object.<%=val.name%>) unless object.<%=val.name%>.nil? end<% end %>
+<% valid_response_relations(false, 0, :belongs_to, :has_one, :has_many).each do |val| %>
+    expose :<%=val.name%>, using: <%=entities_namespace%>::<%=val.class_name%>::Response, documentation: { type: '<%=val.class_name%>', desc: '<%=val.human_name%>' }, safe: true<% end %>
+<% valid_response_relations(true, 0, :has_and_belongs_to_many).each do |val| %>
+    expose :<%=val.name%>, documentation: { desc: '<%=val.class_name%>' }, safe: true do |object, _options| "<%=entities_namespace%>::#{object.<%=val.name%>.class}::Response".constantize.represent(object.<%=val.name%>) unless object.<%=val.name%>.nil? end<% end %>
+<% valid_response_relations(false, 0, :has_and_belongs_to_many).each do |val| %>
+    expose :<%=val.name%>, using: <%=entities_namespace%>::<%=val.class_name%>::Response, documentation: { type: '<%=val.class_name%>', desc: '<%=val.human_name%>' }, safe: true<% end %>
+  end
+
+end
+
+require_relative 'concerns/<%=file_name%>' if File.exist?(File.expand_path('../concerns/<%=file_name%>.rb', __FILE__))

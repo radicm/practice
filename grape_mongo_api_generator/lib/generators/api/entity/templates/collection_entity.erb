@@ -1,0 +1,8 @@
+class <%=entity_collection_name%> < Grape::Entity
+
+  def self.entity_name
+    '<%=class_name%>Collection'
+  end
+
+  expose :results, using: <%=entities_namespace%>::<%=class_name%>::Response, documentation: { type: '<%=class_name%>', desc: 'Results' } # , as: :alias
+end

@@ -1,0 +1,29 @@
+module <%=assistants_namespace%>::Authenticate
+  extend Grape::API::Helpers
+
+  def warden
+    env['warden']
+  end
+
+  def authenticate!
+    error!('401 Unauthorized', 401) unless current_user
+  end
+
+  def current_user
+    warden.user
+  end
+
+  def skip_filter?(name)
+    env['api.endpoint'].options[:route_options][:skip_filter]
+    filter = env['api.endpoint'].options[:route_options][:skip_filter]
+    filter = [filter] if !filter.is_a? Array
+    filter.include? name
+  end
+
+  def authenticate_device
+    device = Device.find_by(serial_id: params[:device_id])
+    error!('401 Unauthorized', 401) unless device
+    device
+  end
+
+end
