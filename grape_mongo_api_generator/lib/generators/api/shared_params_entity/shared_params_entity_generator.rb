@@ -7,7 +7,7 @@ module Api
       source_root File.expand_path('../templates', __FILE__)
 
       argument :version, type: :string, default: 'v1'
-      argument :app_api_name, type: :string, default: 'mixbank'
+      argument :app_api_name, type: :string, default: 'grape_api'
 
       def create_shared_params_entity
         template('shared_params_entity.erb', "#{entity_path}/shared_params.rb")
