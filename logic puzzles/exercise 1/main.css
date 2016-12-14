@@ -1,0 +1,94 @@
+html {
+    background-color: #e6e9e9;
+    background-image: -webkit-linear-gradient(270deg,rgb(230,233,233) 0%,rgb(216,221,221) 100%);
+    background-image: linear-gradient(270deg,rgb(230,233,233) 0%,rgb(216,221,221) 100%);
+    -webkit-font-smoothing: antialiased;
+}
+
+#wrapper {
+    width: 400px;
+    height: 160px;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+/* entire container, keeps perspective */
+.flip-container {
+	perspective: 1000px;
+    font-family: "Courier New";
+    font-style: italic;
+    font-weight: bold;
+    line-height: 5px;
+}
+/* flip the pane when hovered */
+.flip-container:click .flipper, .flip-container.click .flipper {
+    transform: rotateY(180deg);
+}
+
+.flip-container, .front, .back {
+	width: 400px;
+	height: 160px;
+}
+
+/* flip speed goes here */
+.flipper {
+	transition: 0.6s;
+	transform-style: preserve-3d;
+	position: relative;
+}
+
+/* hide back of pane during swap */
+.front, .back {
+    height: 160px;
+	backface-visibility: hidden;
+    text-align: center;
+    line-height: 160px;  
+	position: absolute;
+    border-style: double;
+	top: 0;
+	left: 0;
+    padding: 15px;
+    background-color: white;
+}
+
+/* front pane, placed above back */
+.front {
+	z-index: 2;
+	/* for firefox 31 */
+	transform: rotateY(0deg);
+}
+
+img{
+    margin: -13px;
+}
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+/* back, initially hidden pane */
+.back {
+	transform: rotateY(180deg);
+}
+
+vertical.flip-container {
+	position: relative;
+}
+
+	.vertical .back {
+		transform: rotateX(180deg);
+	}
+
+	.vertical.flip-container .flipper {
+		transform-origin: 100% 98px; /* half of height */
+	}
+
+	.vertical.flip-container:hover .flipper {
+		transform: rotateX(-180deg);
+	}
