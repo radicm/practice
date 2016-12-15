@@ -1,0 +1,45 @@
+/*Decodes varInt compressed array in - compressed array out - decompressed array encLength - compressed array length decLength - decompressed array length */ 
+void varInt_decode(byte *in, uint16 *out, int encLength, int *decLength){
+    int i = 0;
+    byte *outBase = out;
+    uint16 outVal = 0;
+    int shift = 0;
+    byte hasNext = 0;
+    while (i < encLength){
+   	 outVal = 0;
+   	 shift = 0;
+   	 hasNext = 0;
+   	 do {
+   		 hasNext = *in & 0x80;
+   		 outVal = outVal | ((uint16)(*in++ & 0x7F) << shift);
+   		 shift += 7;
+   		 i++;
+   	 } while (hasNext != 0);
+   	 *out = outVal;
+   	 out++;
+    }
+    *decLength = out - outBase;
+}
+/* Encodes array of uint16 in - uint16 array for compress out - compressed byte array rawLength - length of uint16 array encLEngth - compressed byte array 
+length */ void varInt_encode(uint16 *in, byte *out, int rawLength, int *encLength){
+    byte byteValue;
+    uint16 inValue = 0;
+    byte *outBase = out;
+    for (int i = 0; i < rawLength; i++, in++){ //iterate over input array
+   	 inValue = *in;
+   	 do { //iterate through one item 16bit
+   		 byteValue = (byte)(inValue & 0x7F); //set 8bit to 0
+   		 inValue >>= 7; //shift 7bit to left
+   		 if (inValue > 0) byteValue |= 0x80; //check higher 8bit != 0
+   		 *out = byteValue;
+   		 out++;
+   	 } while (inValue > 0);
+    }
+    *encLength = out - outBase; //length of encoded array
+}
+byte charToHex(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    else if (c >= 'A' && c <= 'F') return c - 'A' + 0xA;
+    else if (c >= 'a' && c <= 'f') return c - 'a' + 0xA;
+    else return 0;
+}
