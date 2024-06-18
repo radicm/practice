@@ -45,7 +45,7 @@ def select_shim(measure:, shim:, limit_min:, limit_max:, target: nil, increment:
   # 0.27 calculate new clearence
   clearance_change = (shim - selected_shim).round(2) * thickness_modifier
 
-  { ideal_shim: ideal_shim, selected_shim: selected_shim, target_clearance: target_value, clearance: (measure + clearance_change).round(2) }
+  { ideal_shim: ideal_shim.round(2), selected_shim: selected_shim, target_clearance: target_value, clearance: (measure + clearance_change).round(2) }
 end
 
 # example
