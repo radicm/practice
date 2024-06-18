@@ -35,17 +35,17 @@ def select_shim(measure:, shim:, limit_min:, limit_max:, target: nil, increment:
   delta  = (measure - target_value).round(2) * thickness_modifier
 
   # 170 select ideal shim size
-  ideal_shim_size = shim + delta
+  ideal_shim = shim + delta
 
   # 170 select existing shim size based on available increment
   increment_delta = (1 / increment)
 
-  selected_shim = (((ideal_shim_size * 10) * increment_delta).round / increment_delta) / 10
+  selected_shim = (((ideal_shim * 10) * increment_delta).round / increment_delta) / 10
 
   # 0.27 calculate new clearence
   clearance_change = (shim - selected_shim).round(2) * thickness_modifier
 
-  {selected_shim: selected_shim, target_clearance: target_value, clearance: (measure + clearance_change).round(2)}
+  { ideal_shim: ideal_shim, selected_shim: selected_shim, target_clearance: target_value, clearance: (measure + clearance_change).round(2) }
 end
 
 # example
